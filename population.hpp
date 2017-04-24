@@ -9,7 +9,6 @@
 class Population {
   private:
     std::vector<Individual> population;
-    std::vector<double> globalBest;
     double upperBound;
     double lowerBound;
     int dimension;
@@ -27,8 +26,7 @@ class Population {
     void updateIndividual(Individual individual, int pos);
 
     int getTamPopulation();
-    std::vector<double> getGlobalBest();
-    void setGlobalBest(std::vector<double> globalBest);
+
 
     double fRand(double fMin, double fMax);
 };

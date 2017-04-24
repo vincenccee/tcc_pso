@@ -16,12 +16,16 @@ std::vector<double> Individual::getCurrentPosition(){
   return this->currentPosition;
 }
 
-std::vector<double> Individual::getBestPosition(){
-  return this->bestPosition;
+std::vector<double> Individual::getVelocityVector(){
+  return this->velocity;
 }
 
-std::vector<double> Individual::getVelocity(){
-  return this->velocity;
+double Individual::getBestPosition(int pos){
+  return this->bestPosition[pos];
+}
+
+double Individual::getVelocity(int pos){
+  return this->velocity[pos];
 }
 
 double Individual::getFitness(){
@@ -50,4 +54,8 @@ void Individual::setVelocity(std::vector<double> velocity){
 
 void Individual::setFitness(double fitness){
   this->fitness = fitness;
+}
+
+void Individual::setBestFitness(double fitness){
+  this->bestFitness = fitness;
 }

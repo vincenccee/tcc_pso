@@ -44,14 +44,6 @@ int Population::getTamPopulation(){
   return this->tamPopulation;
 }
 
-std::vector<double> Population::getGlobalBest(){
-  return this->globalBest;
-}
-
-void Population::setGlobalBest(std::vector<double> globalBest){
-  this->globalBest = globalBest;
-}
-
 double Population::fRand(double fMin, double fMax){
   double f = (double)rand() / RAND_MAX;
   return fMin + f * (fMax - fMin);
