@@ -1,4 +1,4 @@
-PARAMS=-g -c -Wall -std=c++11
+PARAMS=-c -Wall -std=c++11 -O2 -pg -g
 # -fopenmp
 
 all: app
