@@ -31,6 +31,7 @@ class ParticleSwarm {
     int runs;
     int iterations;
     int tamPopulation;
+    int randonDistribution;
 
   public:
     ParticleSwarm(Problem *problem, int tamPopulation);
@@ -39,7 +40,7 @@ class ParticleSwarm {
 
     void showPopulation();
     void evolutionaryCicle(int iterations, int runs);
-    void evaluatePopulationFitness();
+    void evaluatePopulationFitness(bool first = false);
     void updateParticleVelocity();
     void updateParticlePosition();
     std::vector<double> validatePosition(std::vector<double> position);

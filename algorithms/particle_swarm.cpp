@@ -5,9 +5,10 @@ using namespace std;
 ParticleSwarm::ParticleSwarm(Problem *problem, int tamPopulation){
   this->problem = problem;
   this->tamPopulation = tamPopulation;
-  this->velocityInertia = 0.6;
-  this->acelerationCons1 = 0.20;
-  this->acelerationCons1 = 0.20;
+  this->velocityInertia = 0.729;
+  this->acelerationCons1 = 1.49445;
+  this->acelerationCons2 = 1.49445;
+  this->randonDistribution = 0;
 }
 
 ParticleSwarm::ParticleSwarm(){}
@@ -23,7 +24,13 @@ void ParticleSwarm::showPopulation(){
     for(unsigned int j=0; j<position.size() ; j++){
       cout << " * " << position[j];
     }
-    cout << " - fitness: " << swarm->getIndividual(i)->getFitness() << endl;
+    cout << " - fitness: " << swarm->getIndividual(i)->getFitness() << " - bestF: " << swarm->getIndividual(i)->getBestFitness() << endl;
+    /* show population velocity */
+    // cout << "ind " << i << "\t";
+    // for(unsigned int j=0; j<position.size() ; j++){
+    //   cout << " * " << swarm->getIndividual(i)->getVelocity(j);
+    // }
+    // cout << endl;
   }
 }
 
@@ -43,16 +50,17 @@ void ParticleSwarm::evolutionaryCicle(int iterations, int runs){
     this->swarm = new Population(tamPopulation, problem->getDimension(), problem->getLowerBound(j), problem->getUpperBound(j));
     swarm->initializePopulation();
     this->m_nmdf = 0;
-    evaluatePopulationFitness();
+    evaluatePopulationFitness(true);
+    showPopulation();
     initializeBest();
     cout << "************** inicio ****************" << endl;
-    showPopulation();
     for(int i=0; i<this->iterations; i++){
-      updateBest(i);
-      updatePlot(i);
       updateParticleVelocity();
       updateParticlePosition();
       evaluatePopulationFitness();
+      showPopulation();
+      updateBest(i);
+      updatePlot(i);
     }
     result = this->bestFitness;
     finalFitness.push_back(result);
@@ -74,35 +82,24 @@ void ParticleSwarm::evolutionaryCicle(int iterations, int runs){
   popdata.close();
 }
 
-void ParticleSwarm::evaluatePopulationFitness(){
-  int newFitness;
-  Individual *tmpInd;
-  // For para ser paralizado (OPEN-MP)
-  // #pragma omp parallel for
-  for(int i=0; i<tamPopulation; i++){
-    tmpInd = swarm->getIndividual(i);
-    newFitness = problem->evaluateFitness(tmpInd->getCurrentPosition());
-    if(problem->fitnesIsBetter(newFitness, tmpInd->getFitness())){
-      tmpInd->setBestFitness(newFitness);
-      tmpInd->setBestPosition(tmpInd->getCurrentPosition());
-    }
-    tmpInd->setFitness(newFitness);
-    swarm->updateIndividual(*tmpInd, i);
-  }
-}
-
 void ParticleSwarm::updateParticleVelocity(){
   std::vector<double> newVelocity;
   Individual *tmpInd;
+  double cognitive, social, inertia, rand1, rand2;
 
   for(int i=0; i<tamPopulation; i++){
     tmpInd = swarm->getIndividual(i);
     newVelocity.clear();
     for(unsigned int j=0; j<problem->getDimension(); j++){
-      cout << "bp: " << acelerationCons2 * fRand(0,1) * (this->bestPosition[j] - tmpInd->getPosition(j)) << endl;
-      newVelocity.push_back((velocityInertia * tmpInd->getVelocity(j)) +
-                            (acelerationCons1 * fRand(0,1) * (tmpInd->getBestPosition(j) - tmpInd->getPosition(j))) +
-                            (acelerationCons2 * fRand(0,1) * (this->bestPosition[j] - tmpInd->getPosition(j))));
+      rand1 = fRand(0,1);
+      rand2 = fRand(0,1);
+      cognitive = this->acelerationCons1 * rand1 * (tmpInd->getBestPosition(j) - tmpInd->getPosition(j));
+      social = this->acelerationCons2 * rand2 * (this->bestPosition[j] - tmpInd->getPosition(j));
+      inertia = this->velocityInertia * tmpInd->getVelocity(j);
+      // cout << "aux1: " << cognitive << " - aux2: " << social << endl;
+      // cout << "const: " << this->acelerationCons1 << " - dif1: " << (this->bestPosition[j] - tmpInd->getPosition(j)) << " - dif2: " << (tmpInd->getBestPosition(j) - tmpInd->getPosition(j)) << endl;
+      newVelocity.push_back(inertia + cognitive + social);
+      // cout << "atualVelocity: " << tmpInd->getVelocity(j) << " - newVelocity " << j << " :" << newVelocity[j] << endl;
     }
     swarm->getIndividual(i)->setVelocity(newVelocity);
   }
@@ -135,16 +132,40 @@ std::vector<double> ParticleSwarm::validatePosition(std::vector<double> position
   return position;
 }
 
+void ParticleSwarm::evaluatePopulationFitness(bool first){
+  int newFitness;
+  Individual *tmpInd;
+  // For para ser paralizado (OPEN-MP)
+  // #pragma omp parallel for
+  for(int i=0; i<tamPopulation; i++){
+    tmpInd = swarm->getIndividual(i);
+    newFitness = problem->evaluateFitness(tmpInd->getCurrentPosition());
+    if(problem->fitnesIsBetter(newFitness, tmpInd->getBestFitness()) || first) {
+      tmpInd->setBestFitness(newFitness);
+      tmpInd->setBestPosition(tmpInd->getCurrentPosition());
+    }
+    tmpInd->setFitness(newFitness);
+    swarm->updateIndividual(*tmpInd, i);
+  }
+}
+
 void ParticleSwarm::initializeBest(){
   this->bestFitness = swarm->getIndividual(0)->getFitness();
   this->bestPosition = swarm->getIndividual(0)->getCurrentPosition();
+  for(int i=1; i < tamPopulation; i++) {
+    if(problem->fitnesIsBetter(swarm->getIndividual(i)->getFitness(), this->bestFitness)){
+      this->bestFitness = swarm->getIndividual(i)->getFitness();
+      this->bestPosition.clear();
+      this->bestPosition = swarm->getIndividual(i)->getCurrentPosition();
+    }
+  }
 }
 
 void ParticleSwarm::updateBest(int pos){
   Individual *tmpInd;
   for(int i=0; i < tamPopulation; i++) {
     tmpInd = swarm->getIndividual(i);
-    if(problem->fitnesIsBetter(tmpInd->getFitness(), this->bestFitness)){
+    if(problem->fitnesIsBetter(tmpInd->getBestFitness(), this->bestFitness)){
       this->bestPosition = tmpInd->getCurrentPosition();
       this->bestFitness = tmpInd->getFitness();
     }
