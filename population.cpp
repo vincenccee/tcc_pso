@@ -17,13 +17,16 @@ Population::~Population(){}
 void Population::initializePopulation(){
   this->population.clear();
   std::vector<double> position;
+  std::vector<double> velocity;
   Individual *tmpInd;
   for(int i=0; i< tamPopulation; i++){
     position.clear();
+    velocity.clear();
     for(int j=0; j<dimension; j++){
       position.push_back(fRand(lowerBound, upperBound));
+      velocity.push_back((upperBound - lowerBound) * fRand(0,1) + lowerBound);
     }
-    tmpInd = new Individual(position, this->dimension);
+    tmpInd = new Individual(position, velocity, this->dimension);
     this->population.push_back(*tmpInd);
   }
 }
