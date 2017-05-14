@@ -26,11 +26,11 @@ void ParticleSwarm::showPopulation(){
     }
     cout << " - fitness: " << swarm->getIndividual(i)->getFitness() << " - bestF: " << swarm->getIndividual(i)->getBestFitness() << endl;
     /* show population velocity */
-    // cout << "ind " << i << "\t";
-    // for(unsigned int j=0; j<position.size() ; j++){
-    //   cout << " * " << swarm->getIndividual(i)->getVelocity(j);
-    // }
-    // cout << endl;
+    cout << "velo: " << "\t";
+    for(unsigned int j=0; j<position.size() ; j++){
+      cout << " * " << swarm->getIndividual(i)->getVelocity(j);
+    }
+    cout << endl;
   }
 }
 
@@ -133,7 +133,7 @@ std::vector<double> ParticleSwarm::validatePosition(std::vector<double> position
 }
 
 void ParticleSwarm::evaluatePopulationFitness(bool first){
-  int newFitness;
+  double newFitness;
   Individual *tmpInd;
   // For para ser paralizado (OPEN-MP)
   // #pragma omp parallel for
