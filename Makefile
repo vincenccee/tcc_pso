@@ -3,14 +3,17 @@ PARAMS=-c -Wall -std=c++11 -O2 -pg -g
 
 all: app
 
-app: individual.o population.o main.o particle_swarm.o problem.o scenario.o ackley.o griewank.o rastring.o rosembrock.o schwefel.o sphere.o moving_peaks.o
-	g++ individual.o population.o main.o particle_swarm.o problem.o scenario.o ackley.o griewank.o rastring.o rosembrock.o schwefel.o sphere.o moving_peaks.o -o app
+app: individual.o population.o main.o particle_swarm.o clan_particle_swarm.o problem.o scenario.o ackley.o griewank.o rastring.o rosembrock.o schwefel.o sphere.o moving_peaks.o
+	g++ individual.o population.o main.o particle_swarm.o clan_particle_swarm.o problem.o scenario.o ackley.o griewank.o rastring.o rosembrock.o schwefel.o sphere.o moving_peaks.o -o app
 
 main.o: main.cpp
 	g++ $(PARAMS) main.cpp
 
 particle_swarm.o: algorithms/particle_swarm.cpp
 	g++ $(PARAMS) algorithms/particle_swarm.cpp
+
+clan_particle_swarm.o: algorithms/clan_particle_swarm.cpp
+	g++ $(PARAMS) algorithms/clan_particle_swarm.cpp
 
 individual.o: individual.cpp
 	g++ $(PARAMS) individual.cpp

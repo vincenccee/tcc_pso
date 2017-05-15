@@ -3,14 +3,16 @@
 #include <vector>
 #include <algorithm>
 
-#define TAM_POP 5
+#define TAM_POP 10
 #define DIMENSION 5
-#define ITERATIONS 50
-#define RUNS 5
+#define ITERATIONS 100
+#define RUNS 1
+#define NUM_CLANS 2
 
 #include <string>
 #include <cmath>
 #include "algorithms/particle_swarm.hpp"
+#include "algorithms/clan_particle_swarm.hpp"
 #include "benchmarcks/problem.hpp"
 #include "benchmarcks/problem_factory.hpp"
 
@@ -23,6 +25,7 @@ int main(int argc, char **argv) {
   string value;
   int algorithm;
   ParticleSwarm *pso;
+  ClanParticleSwarm *cpso;
 
   value = getProblem();
   cout << "opcao escolhida foi: " << value << endl;
@@ -34,6 +37,10 @@ int main(int argc, char **argv) {
     case 1:
       pso = new ParticleSwarm(problem, TAM_POP);
       pso->evolutionaryCicle(ITERATIONS, RUNS);
+      break;
+    case 2:
+      cpso = new ClanParticleSwarm(problem, TAM_POP, NUM_CLANS);
+      cpso->evolutionaryCicle(ITERATIONS, RUNS);
       break;
     default:
       cout << "Opcao Invalida" << endl;
@@ -88,6 +95,7 @@ int getAlgorithm(){
   int index;
   cout << "Select the algorithm:" << endl;
   cout << "1. PSO" << endl;
+  cout << "2. CPSO" << endl;
   cin >> index;
   return index;
 }
