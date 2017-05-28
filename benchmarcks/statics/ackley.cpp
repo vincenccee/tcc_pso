@@ -41,4 +41,8 @@ bool Ackley::isMinimization(){
   return true;
 }
 
+bool Ackley::isDynamic(){
+  return false;
+}
+
 void Ackley::resetProblem() {}

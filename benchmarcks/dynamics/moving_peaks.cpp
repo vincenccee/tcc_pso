@@ -94,6 +94,10 @@ bool MovingPeaks::isMinimization(){
 	return false;
 }
 
+bool MovingPeaks::isDynamic(){
+	return true;
+}
+
 double MovingPeaks::cone(std::vector<double> individual, std::vector<double> position, double height, double width){
   double value = 0.0;
   for(int i=0; i<this->dimension; i++)

@@ -38,4 +38,8 @@ bool Sphere::isMinimization(){
   return true;
 }
 
+bool Sphere::isDynamic(){
+  return false;
+}
+
 void Sphere::resetProblem() {}

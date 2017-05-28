@@ -35,4 +35,8 @@ bool Rastring::isMinimization(){
   return true;
 }
 
+bool Rastring::isDynamic(){
+  return false;
+}
+
 void Rastring::resetProblem() {}

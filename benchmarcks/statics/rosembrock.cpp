@@ -39,4 +39,8 @@ bool Rosembrock::isMinimization(){
   return true;
 }
 
+bool Rosembrock::isDynamic(){
+  return false;
+}
+
 void Rosembrock::resetProblem() {}

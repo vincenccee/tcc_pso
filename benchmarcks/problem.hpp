@@ -13,6 +13,7 @@ class Problem {
     virtual std::string getName() = 0;
     virtual bool fitnesIsBetter(double newFit, double oldFit) = 0;
     virtual bool isMinimization() = 0;
+    virtual bool isDynamic() = 0;
     virtual void resetProblem() = 0;
     
     std::vector<double> validatePosition(std::vector<double> position);

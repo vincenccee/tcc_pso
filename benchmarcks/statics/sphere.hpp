@@ -21,6 +21,7 @@ class Sphere: public Problem {
     std::string getName();
     bool fitnesIsBetter(double newFit, double oldFit);
     bool isMinimization();
+    bool isDynamic();
     void resetProblem();
 }; 
 

@@ -41,4 +41,8 @@ bool Schwefel::isMinimization(){
   return true;
 }
 
+bool Schwefel::isDynamic(){
+  return false;
+}
+
 void Schwefel::resetProblem() {}

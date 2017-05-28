@@ -39,4 +39,8 @@ bool Griewank::isMinimization(){
   return true;
 }
 
+bool Griewank::isDynamic(){
+  return false;
+}
+
 void Griewank::resetProblem() {}
