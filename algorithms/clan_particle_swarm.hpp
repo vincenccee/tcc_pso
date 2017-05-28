@@ -11,6 +11,12 @@
 #include "../individual.hpp"
 #include "../benchmarcks/problem.hpp"
 
+#define CONS1 2.05
+#define CONS2 2.05
+#define INERTIA 0.729
+#define VMAX 0.1
+#define VTYPE 1
+
 class ClanParticleSwarm {
   private:
     Problem *problem;
@@ -27,16 +33,13 @@ class ClanParticleSwarm {
     std::ofstream popdata;
 
     double bestFitness;
+    double vMax;
     double m_nmdf;
-    double velocityInertia;
-    double acelerationCons1;
-    double acelerationCons2;
     int numClans;
     int clanSize;
     int runs;
     int iterations;
     int tamPopulation;
-    int randonDistribution;
 
   public:
     ClanParticleSwarm(Problem *problem, int tamPopulation, int numClans);
@@ -51,6 +54,7 @@ class ClanParticleSwarm {
     void updateParticlePosition(int clan);
     void updateClanLeaders(int clan);
     void leadersConference();
+    double validateVelocity(double velocity);
     std::vector<double> validatePosition(std::vector<double> position);
 
     void initializeBest();

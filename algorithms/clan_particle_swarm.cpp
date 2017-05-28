@@ -7,10 +7,6 @@ ClanParticleSwarm::ClanParticleSwarm(Problem *problem, int tamPopulation, int nu
   this->tamPopulation = tamPopulation;
   this->numClans = numClans;
   this->clanSize = tamPopulation/numClans;
-  this->velocityInertia = 0.729;
-  this->acelerationCons1 = 1.49445;
-  this->acelerationCons2 = 1.49445;
-  this->randonDistribution = 0;
 }
 
 ClanParticleSwarm::ClanParticleSwarm(){}
@@ -51,12 +47,14 @@ void ClanParticleSwarm::evolutionaryCicle(int iterations, int runs){
     leaders.push_back(0);
   }
 
+  this->vMax = (problem->getUpperBound(0) - problem->getLowerBound(0)) * VMAX;
+
   for(int j=0; j<this->runs; j++){
     this->swarm = new Population(tamPopulation, problem->getDimension(), problem->getLowerBound(j), problem->getUpperBound(j));
     swarm->initializePopulation();
     this->m_nmdf = 0;
     evaluatePopulationFitnessFirst();
-    showPopulation();
+    // showPopulation();
     initializeBest();
     cout << "************** inicio ****************" << endl;
     for(int i=0; i<this->iterations; i++){
@@ -66,9 +64,9 @@ void ClanParticleSwarm::evolutionaryCicle(int iterations, int runs){
         evaluatePopulationFitness(clan);
         updateClanLeaders(clan);
       }
-      // leadersConference();
+      leadersConference();
       // cout << "**** " << i << " *****" << endl;
-      showPopulation();
+      // showPopulation();
       updateBest(i);
       updatePlot(i);
     }
@@ -95,25 +93,61 @@ void ClanParticleSwarm::evolutionaryCicle(int iterations, int runs){
 void ClanParticleSwarm::updateParticleVelocity(int clan){
   std::vector<double> newVelocity;
   Individual *tmpInd;
-  double cognitive, social, inertia, rand1, rand2;
-  int initClan = clan*this->clanSize;
-  int finalClan = (clan+1)*this->clanSize;
-
-  for(int i=initClan; i<finalClan; i++){
-    tmpInd = swarm->getIndividual(i);
-    newVelocity.clear();
-    for(unsigned int j=0; j<problem->getDimension(); j++){
-      rand1 = fRand(0,1);
-      rand2 = fRand(0,1);
-      cognitive = this->acelerationCons1 * rand1 * (tmpInd->getBestPosition(j) - tmpInd->getPosition(j));
-      social = this->acelerationCons2 * rand2 * (this->bestClanPosition[clan][j] - tmpInd->getPosition(j));
-      inertia = this->velocityInertia * tmpInd->getVelocity(j);
-      // cout << "aux1: " << cognitive << " - aux2: " << social << endl;
-      // cout << "const: " << this->acelerationCons1 << " - dif1: " << (this->bestPosition[j] - tmpInd->getPosition(j)) << " - dif2: " << (tmpInd->getBestPosition(j) - tmpInd->getPosition(j)) << endl;
-      newVelocity.push_back(inertia + cognitive + social);
-      // cout << "atualVelocity: " << tmpInd->getVelocity(j) << " - newVelocity " << j << " :" << newVelocity[j] << endl;
+  double cognitive, social, inertia, construtiveInertia;
+  if(clan < 0){
+    for(int i=0; i<numClans; i++){
+      tmpInd = swarm->getIndividual(leaders[i]);
+      newVelocity.clear();
+      for(unsigned int j=0; j<problem->getDimension(); j++){
+        if(VTYPE == 1){
+          int phi = CONS1 + CONS2;
+          if(phi < 4) phi = 4;
+          int aux = 2 - phi - sqrt(pow(phi, 2) - 4*phi);
+          if(aux < 0) aux = aux*(-1);
+          construtiveInertia = 2/aux;
+        } else {
+          construtiveInertia = 1;
+        }
+        cognitive = CONS1 * fRand(0,1) * (tmpInd->getBestPosition(j) - tmpInd->getPosition(j));
+        social = CONS2 * fRand(0,1) * (this->bestPosition[j] - tmpInd->getPosition(j));
+        inertia = INERTIA * tmpInd->getVelocity(j);
+        newVelocity.push_back(validateVelocity(construtiveInertia*(inertia + cognitive + social)));
+      }
+      swarm->getIndividual(leaders[i])->setVelocity(newVelocity);
     }
-    swarm->getIndividual(i)->setVelocity(newVelocity);
+  } else {
+    int initClan = clan*this->clanSize;
+    int finalClan = (clan+1)*this->clanSize;
+    for(int i=initClan; i<finalClan; i++){
+      tmpInd = swarm->getIndividual(i);
+      newVelocity.clear();
+      for(unsigned int j=0; j<problem->getDimension(); j++){
+        if(VTYPE == 1){
+          int phi = CONS1 + CONS2;
+          if(phi < 4) phi = 4;
+          int aux = 2 - phi - sqrt(pow(phi, 2) - 4*phi);
+          if(aux < 0) aux = aux*(-1);
+          construtiveInertia = 2/aux;
+        } else {
+          construtiveInertia = 1;
+        }
+        cognitive = CONS1 * fRand(0,1) * (tmpInd->getBestPosition(j) - tmpInd->getPosition(j));
+        social = CONS2 * fRand(0,1) * (this->bestClanPosition[clan][j] - tmpInd->getPosition(j));
+        inertia = INERTIA * tmpInd->getVelocity(j);
+        newVelocity.push_back(validateVelocity(construtiveInertia*(inertia + cognitive + social)));
+      }
+      swarm->getIndividual(i)->setVelocity(newVelocity);
+    }
+  }
+}
+
+double ClanParticleSwarm::validateVelocity(double velocity){
+  if(velocity > vMax){
+    return vMax;
+  } else if(velocity < -vMax) {
+    return -vMax;
+  } else {
+    return velocity;
   }
 }
 
@@ -122,17 +156,29 @@ void ClanParticleSwarm::updateParticlePosition(int clan){
   std::vector<double> currentPosition;
   std::vector<double> velocity;
   Individual *tmpInd;
-  int initClan = clan*this->clanSize;
-  int finalClan = (clan+1)*this->clanSize;
 
-  for(int i=initClan; i<finalClan; i++){
-    tmpInd = swarm->getIndividual(i);
-    currentPosition = tmpInd->getCurrentPosition();
-    newPosition.clear();
-    for(int j=0; j<problem->getDimension(); j++){
-      newPosition.push_back(currentPosition[j] + tmpInd->getVelocity(j));
+  if(clan < 0){
+    for(int i=0; i<numClans; i++){
+      tmpInd = swarm->getIndividual(leaders[i]);
+      currentPosition = tmpInd->getCurrentPosition();
+      newPosition.clear();
+      for(int j=0; j<problem->getDimension(); j++){
+        newPosition.push_back(currentPosition[j] + tmpInd->getVelocity(j));
+      }
+      swarm->getIndividual(leaders[i])->setCurrentPosition(validatePosition(newPosition));
     }
-    swarm->getIndividual(i)->setCurrentPosition(validatePosition(newPosition));
+  } else {
+    int initClan = clan*this->clanSize;
+    int finalClan = (clan+1)*this->clanSize;
+    for(int i=initClan; i<finalClan; i++){
+      tmpInd = swarm->getIndividual(i);
+      currentPosition = tmpInd->getCurrentPosition();
+      newPosition.clear();
+      for(int j=0; j<problem->getDimension(); j++){
+        newPosition.push_back(currentPosition[j] + tmpInd->getVelocity(j));
+      }
+      swarm->getIndividual(i)->setCurrentPosition(validatePosition(newPosition));
+    }
   }
 }
 
@@ -148,7 +194,7 @@ std::vector<double> ClanParticleSwarm::validatePosition(std::vector<double> posi
 }
 
 void ClanParticleSwarm::evaluatePopulationFitnessFirst(){
-  int newFitness;
+  double newFitness;
   Individual *tmpInd;
   // For para ser paralizado (OPEN-MP)
   // #pragma omp parallel for
@@ -163,21 +209,37 @@ void ClanParticleSwarm::evaluatePopulationFitnessFirst(){
 }
 
 void ClanParticleSwarm::evaluatePopulationFitness(int clan){
-  int newFitness;
+  double newFitness;
   Individual *tmpInd;
-  int initClan = clan*this->clanSize;
-  int finalClan = (clan+1)*this->clanSize;
-  // For para ser paralizado (OPEN-MP)
-  // #pragma omp parallel for
-  for(int i=initClan; i<finalClan; i++){
-    tmpInd = swarm->getIndividual(i);
-    newFitness = problem->evaluateFitness(tmpInd->getCurrentPosition());
-    if(problem->fitnesIsBetter(newFitness, tmpInd->getBestFitness())) {
-      tmpInd->setBestFitness(newFitness);
-      tmpInd->setBestPosition(tmpInd->getCurrentPosition());
+
+  if(clan < 0){
+    // For para ser paralizado (OPEN-MP)
+    // #pragma omp parallel for
+    for(int i=0; i<numClans; i++){
+      tmpInd = swarm->getIndividual(leaders[i]);
+      newFitness = problem->evaluateFitness(tmpInd->getCurrentPosition());
+      if(problem->fitnesIsBetter(newFitness, tmpInd->getBestFitness())) {
+        tmpInd->setBestFitness(newFitness);
+        tmpInd->setBestPosition(tmpInd->getCurrentPosition());
+      }
+      tmpInd->setFitness(newFitness);
+      swarm->updateIndividual(*tmpInd, leaders[i]);
     }
-    tmpInd->setFitness(newFitness);
-    swarm->updateIndividual(*tmpInd, i);
+  } else {
+    int initClan = clan*this->clanSize;
+    int finalClan = (clan+1)*this->clanSize;
+    // For para ser paralizado (OPEN-MP)
+    // #pragma omp parallel for
+    for(int i=initClan; i<finalClan; i++){
+      tmpInd = swarm->getIndividual(i);
+      newFitness = problem->evaluateFitness(tmpInd->getCurrentPosition());
+      if(problem->fitnesIsBetter(newFitness, tmpInd->getBestFitness())) {
+        tmpInd->setBestFitness(newFitness);
+        tmpInd->setBestPosition(tmpInd->getCurrentPosition());
+      }
+      tmpInd->setFitness(newFitness);
+      swarm->updateIndividual(*tmpInd, i);
+    }
   }
 }
 
@@ -208,19 +270,16 @@ void ClanParticleSwarm::initializeBest(){
 }
 
 void ClanParticleSwarm::updateClanLeaders(int clan){
-  int initClan, finalClan;
-  for(int clan=0; clan<numClans; clan++){
-    initClan = clan*this->clanSize;
-    finalClan = (clan+1)*this->clanSize;
-    for(int i=initClan; i < finalClan; i++) {
-      if(problem->fitnesIsBetter(swarm->getIndividual(i)->getFitness(), this->bestClanFitness[clan])){
-        this->bestClanFitness[clan] = swarm->getIndividual(i)->getFitness();
-        this->bestClanPosition[clan] = swarm->getIndividual(i)->getCurrentPosition();
-        this->leaders[clan] = i;
-        if(problem->fitnesIsBetter(this->bestClanFitness[clan], this->bestFitness)){
-          this->bestFitness = this->bestClanFitness[clan];
-          this->bestPosition = this->bestClanPosition[clan];
-        }
+  int initClan = clan*this->clanSize;
+  int finalClan = (clan+1)*this->clanSize;
+  for(int i=initClan; i < finalClan; i++) {
+    if(problem->fitnesIsBetter(swarm->getIndividual(i)->getFitness(), this->bestClanFitness[clan])){
+      this->bestClanFitness[clan] = swarm->getIndividual(i)->getFitness();
+      this->bestClanPosition[clan] = swarm->getIndividual(i)->getCurrentPosition();
+      this->leaders[clan] = i;
+      if(problem->fitnesIsBetter(this->bestClanFitness[clan], this->bestFitness)){
+        this->bestFitness = this->bestClanFitness[clan];
+        this->bestPosition = this->bestClanPosition[clan];
       }
     }
   }
@@ -234,11 +293,17 @@ void ClanParticleSwarm::leadersConference(){
 }
 
 void ClanParticleSwarm::updateBest(int pos){
-  cout << "best: ";
-  for(int i=0; i < problem->getDimension(); i++) {
-    cout << "* " << this->bestPosition[i];
+  for(int i=0; i<numClans; i++){
+    if(problem->fitnesIsBetter(swarm->getIndividual(leaders[i])->getFitness(), this->bestFitness)){
+      this->bestFitness = swarm->getIndividual(leaders[i])->getFitness();
+      this->bestPosition = swarm->getIndividual(leaders[i])->getCurrentPosition();
+    }
   }
-  cout << " - fitness : " << this->bestFitness << endl;
+  // cout << "best: ";
+  // for(int i=0; i < problem->getDimension(); i++) {
+  //   cout << "* " << this->bestPosition[i];
+  // }
+  // cout << " - fitness : " << this->bestFitness << endl;
   bestIndividualFitness[pos] += this->bestFitness;
 }
 
