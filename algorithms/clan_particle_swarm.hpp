@@ -54,6 +54,7 @@ class ClanParticleSwarm {
     void updateParticlePosition(int clan);
     void updateClanLeaders(int clan);
     void leadersConference();
+    void detectChange();
     double validateVelocity(double velocity);
     std::vector<double> validatePosition(std::vector<double> position);
 

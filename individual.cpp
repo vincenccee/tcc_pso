@@ -19,6 +19,10 @@ std::vector<double> Individual::getVelocityVector(){
   return this->velocity;
 }
 
+std::vector<double> Individual::getFullBestPosition(){
+  return this->bestPosition
+}
+
 double Individual::getBestPosition(int pos){
   return this->bestPosition[pos];
 }

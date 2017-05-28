@@ -65,8 +65,13 @@ void ClanParticleSwarm::evolutionaryCicle(int iterations, int runs){
         updateClanLeaders(clan);
       }
       leadersConference();
-      // cout << "**** " << i << " *****" << endl;
-      // showPopulation();
+      // if(i%100 == 0){
+      //   cout << "**** " << i << " *****" << endl;
+      //   showPopulation();
+      // }
+      if(problem->isDynamic()){
+        detectChange();
+      }
       updateBest(i);
       updatePlot(i);
     }
@@ -238,6 +243,18 @@ void ClanParticleSwarm::evaluatePopulationFitness(int clan){
         tmpInd->setBestPosition(tmpInd->getCurrentPosition());
       }
       tmpInd->setFitness(newFitness);
+      swarm->updateIndividual(*tmpInd, i);
+    }
+  }
+}
+
+void ClanParticleSwarm::detectChange(){
+  if(this->bestFitness != problem->evaluateFitness(this->bestPosition)){
+    Individual *tmpInd;
+    cout << "detect change!!" << endl;
+    for(int i=0; i<numClans; i++){
+      tmpInd = swarm->getIndividual(leaders[i]);
+      tmpInd->setBestFitness(problem->evaluateFitness(tmpInd->getFullBestPosition()));
       swarm->updateIndividual(*tmpInd, i);
     }
   }

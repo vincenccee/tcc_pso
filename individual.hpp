@@ -18,6 +18,7 @@ class Individual {
     ~Individual();
 
     std::vector<double> getCurrentPosition();
+    std::vector<double> getFullBestPosition();
     std::vector<double> getVelocityVector();
     double getBestPosition(int pos);
     double getVelocity(int pos);
