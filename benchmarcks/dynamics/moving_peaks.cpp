@@ -8,17 +8,18 @@ MovingPeaks::MovingPeaks(int dimension, int scenario){
 
 void MovingPeaks::initializePeaks(){
   this->count = 0;
-  
+
   // set initial height for all peaks
   if(scen->start_height != 0){
     for(int i=0; i<scen->npeaks; i++)
       peaks_height.push_back(scen->start_height);
   }else{
-    for(int i=0; i<scen->npeaks; i++)
+    for(int i=0; i<scen->npeaks; i++){
       peaks_height.push_back(fRand(scen->min_height, scen->max_height));
+    }
   }
 
-  // set initial width for all peaks 
+  // set initial width for all peaks
   if(scen->start_width != 0){
     for(int i=0; i<scen->npeaks; i++)
       peaks_width.push_back(scen->start_width);
@@ -77,6 +78,7 @@ double MovingPeaks::evaluateFitness(std::vector<double> solution){
   if(this->count % scen->period == 0){
     cout << "evaluations: " << this->count << endl;
     changePeaks();
+    showPeakes();
   }
 
   return maxValue(possible_values);
@@ -218,12 +220,13 @@ double MovingPeaks::maxValue(std::vector<double> values){
 }
 
 double MovingPeaks::fRand(double fMin, double fMax){
-  double f = (double)rand() / RAND_MAX;
-  return fMin + f * (fMax - fMin);
+  std::mt19937 rng(rd()); // random-number engine used (Mersenne-Twister in this case)
+  std::uniform_real_distribution<double> uni(fMin,fMax); // guaranteed unbiased
+  double number = uni(rng);
+  return number;
 }
 
 void MovingPeaks::resetProblem() {
-  // showPeakes();
   peaks_height.clear();
   peaks_width.clear();
   peaks_position.clear();

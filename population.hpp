@@ -27,7 +27,6 @@ class Population {
 
     int getTamPopulation();
 
-
     double fRand(double fMin, double fMax);
 };
 

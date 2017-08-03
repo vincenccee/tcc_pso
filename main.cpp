@@ -3,9 +3,10 @@
 #include <vector>
 #include <algorithm>
 
-#define TAM_POP 10
-#define DIMENSION 5
-#define ITERATIONS 100
+#define TAM_POP 100
+#define DIMENSION 10
+#define SCENARIO 2
+#define ITERATIONS 2000
 #define RUNS 1
 #define NUM_CLANS 2
 
@@ -30,7 +31,7 @@ int main(int argc, char **argv) {
   value = getProblem();
   cout << "opcao escolhida foi: " << value << endl;
   ProblemFactory *factory = new ProblemFactory();
-  Problem *problem = factory->get(value, DIMENSION);
+  Problem *problem = factory->get(value, DIMENSION, SCENARIO);
 
   algorithm = getAlgorithm();
   switch (algorithm){
