@@ -15,6 +15,10 @@ double Schwefel::getLowerBound(int pos){
   return -100.0;
 }
 
+double Schwefel::getFitnessObjetive(){
+  return 0.0;
+}
+
 double Schwefel::evaluateFitness(std::vector<double> solution){
   double fitness = 0;
   double auxFit = 0;

@@ -69,6 +69,15 @@ double MovingPeaks::getLowerBound(int pos){
 	return scen->min_coord;
 }
 
+double MovingPeaks::getFitnessObjetive(){
+  double max_peak_height = 0;
+  for(int i=0; i<peaks_height.size(); i++){
+    if(peaks_height[i] > max_peak_height)
+      max_peak_height = peaks_height[i];
+  }
+  return max_peak_height;
+}
+
 double MovingPeaks::evaluateFitness(std::vector<double> solution){
   std::vector<double> possible_values;
   this->count++;

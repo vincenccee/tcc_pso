@@ -15,6 +15,10 @@ double Rastring::getLowerBound(int pos){
   return -5.12;
 }
 
+double Rastring::getFitnessObjetive(){
+  return 0.0;
+}
+
 double Rastring::evaluateFitness(std::vector<double> solution){
   double obj = 0;
   for(int j = 0 ; j < this->dimension; j++) {

@@ -15,6 +15,10 @@ double Griewank::getLowerBound(int pos){
   return -600.0;
 }
 
+double Griewank::getFitnessObjetive(){
+  return 0.0;
+}
+
 double Griewank::evaluateFitness(std::vector<double> solution){
   double fitness = 0;
   double auxSum = 0;
