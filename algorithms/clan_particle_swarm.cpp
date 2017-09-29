@@ -34,28 +34,16 @@ void ClanParticleSwarm::showPopulation(){
 }
 
 void ClanParticleSwarm::evolutionaryCicle(int iterations, int runs){
+  double result;
   this->iterations = iterations;
   this->runs = runs;
-  this->util->openData("testdata1.txt");
-  double result;
-
-  for(int i=0; i<this->iterations; i++){
-    bestPopulationFitness.push_back(0.0);
-    bestIndividualFitness.push_back(0.0);
-    populationDiversity.push_back(0.0);
-  }
-  for(int i=0; i<this->numClans; i++){
-    leaders.push_back(0);
-  }
-
-  this->vMax = (problem->getUpperBound(0) - problem->getLowerBound(0)) * VMAX;
-
+  initializeVariables();
   for(int j=0; j<this->runs; j++){
     this->swarm = new Population(tamPopulation, problem->getDimension(), problem->getLowerBound(j), problem->getUpperBound(j));
     swarm->initializePopulation();
     this->m_nmdf = 0;
     evaluatePopulationFitnessFirst();
-    // showPopulation();
+    initializeTestParticle();
     initializeBest();
     cout << "************** inicio ****************" << endl;
     for(int i=0; i<this->iterations; i++){
@@ -66,10 +54,6 @@ void ClanParticleSwarm::evolutionaryCicle(int iterations, int runs){
         updateClanLeaders(clan);
       }
       leadersConference();
-      // if(i%100 == 0){
-      //   cout << "**** " << i << " *****" << endl;
-      //   showPopulation();
-      // }
       if(problem->isDynamic()){
         detectChange(i);
       }
@@ -87,6 +71,7 @@ void ClanParticleSwarm::evolutionaryCicle(int iterations, int runs){
     bestPopulationFitness[j] = bestPopulationFitness[j]/this->runs;
     bestIndividualFitness[j] = bestIndividualFitness[j]/this->runs;
     populationDiversity[j] = populationDiversity[j]/this->runs;
+    offlineError[j] = offlineError[j]/this->runs;
   }
   cout << "************** Final ****************" << endl;
   cout << "Media do Fitness: " << this->util->arithmeticAverage(finalFitness) << endl;
@@ -94,7 +79,35 @@ void ClanParticleSwarm::evolutionaryCicle(int iterations, int runs){
 
   this->util->gnu_plot_convergence_best_mean(bestIndividualFitness, bestPopulationFitness, iterations, "MelhoraFitness", "melhora_fit");
   this->util->gnu_plot_convergence(populationDiversity, iterations, "pop_diversity", "fitnessdaPopulacao", "Divesidade Genotipica", 1);
+  this->util->gnu_plot_convergence(offlineError, iterations, "offline_error", "MedidaDePerformance", "Offline Error", 10);
   this->util->closeData();
+}
+
+void ClanParticleSwarm::initializeVariables(){
+  this->util->openData("testdata1.txt");
+  this->vMax = (problem->getUpperBound(0) - problem->getLowerBound(0)) * VMAX;
+
+  for(int i=0; i<this->iterations; i++){
+    bestPopulationFitness.push_back(0.0);
+    bestIndividualFitness.push_back(0.0);
+    populationDiversity.push_back(0.0);
+    offlineError.push_back(0.0);
+  }
+  for(int i=0; i<this->numClans; i++){
+    leaders.push_back(0);
+  }
+}
+
+void ClanParticleSwarm::initializeTestParticle(){
+  Individual *tmpInd = this->swarm->getIndividual(0);
+  std::vector<double> testPosition;
+  std::vector<double> testVelocity;
+  for(int i=0; i<problem->getDimension(); i++){
+    testPosition.push_back(tmpInd->getPosition(i));
+    testVelocity.push_back(tmpInd->getVelocity(i));
+  }
+  this->testParticle = new Individual(testPosition, testVelocity, problem->getDimension());
+  this->testParticle->setFitness(problem->evaluateFitness(testPosition));
 }
 
 void ClanParticleSwarm::updateParticleVelocity(int clan){
@@ -190,7 +203,7 @@ void ClanParticleSwarm::updateParticlePosition(int clan){
 }
 
 std::vector<double> ClanParticleSwarm::validatePosition(std::vector<double> position){
-  for (unsigned int i = 0; i < position.size(); i++) {
+  for(unsigned int i = 0; i < position.size(); i++){
     if(position[i] > problem->getUpperBound(i)){
       position[i] = problem->getUpperBound(i);
     }else if(position[i] < problem->getLowerBound(i)){
@@ -222,7 +235,7 @@ void ClanParticleSwarm::evaluatePopulationFitness(int clan){
   if(clan < 0){
     // For para ser paralizado (OPEN-MP)
     // #pragma omp parallel for
-    for(int i=0; i<numClans; i++){
+    for(int i=0; i<numClans; i++){ // leader conference
       tmpInd = swarm->getIndividual(leaders[i]);
       newFitness = problem->evaluateFitness(tmpInd->getCurrentPosition());
       if(problem->fitnesIsBetter(newFitness, tmpInd->getBestFitness())) {
@@ -232,7 +245,7 @@ void ClanParticleSwarm::evaluatePopulationFitness(int clan){
       tmpInd->setFitness(newFitness);
       swarm->updateIndividual(*tmpInd, leaders[i]);
     }
-  } else {
+  } else { // clans fitness update
     int initClan = clan*this->clanSize;
     int finalClan = (clan+1)*this->clanSize;
     // For para ser paralizado (OPEN-MP)
@@ -251,18 +264,27 @@ void ClanParticleSwarm::evaluatePopulationFitness(int clan){
 }
 
 void ClanParticleSwarm::detectChange(int it){
-  double newFit = problem->evaluateFitness(this->bestPosition);
-  if(this->bestFitness != newFit){
-    Individual *tmpInd;
+  double newFit = problem->evaluateFitness(this->testParticle->getCurrentPosition());
+  if(testParticle->getFitness() != newFit){
     cout << "detect change!! - " << it << endl;
     showPopulation();
-    this->bestFitness = newFit;
+    testParticle->setFitness(newFit);
     for(int i=0; i<numClans; i++){
-      tmpInd = swarm->getIndividual(leaders[i]);
-      tmpInd->setBestFitness(problem->evaluateFitness(tmpInd->getFullBestPosition()));
-      swarm->updateIndividual(*tmpInd, i);
+      reevaluteBestFitness();
+      evaluatePopulationFitness(i);
     }
   }
+}
+
+void ClanParticleSwarm::reevaluteBestFitness(){
+  Individual *tmpInd;
+  for(int i=0; i<tamPopulation; i++){
+    tmpInd = swarm->getIndividual(i);
+    tmpInd->setBestFitness(problem->evaluateFitness(tmpInd->getFullBestPosition()));
+    swarm->updateIndividual(*tmpInd, i);
+  }
+  // reset the best fitness
+  this->bestFitness = swarm->getIndividual(0)->getBestFitness();
 }
 
 void ClanParticleSwarm::initializeBest(){
@@ -299,10 +321,6 @@ void ClanParticleSwarm::updateClanLeaders(int clan){
       this->bestClanFitness[clan] = swarm->getIndividual(i)->getFitness();
       this->bestClanPosition[clan] = swarm->getIndividual(i)->getCurrentPosition();
       this->leaders[clan] = i;
-      if(problem->fitnesIsBetter(this->bestClanFitness[clan], this->bestFitness)){
-        this->bestFitness = this->bestClanFitness[clan];
-        this->bestPosition = this->bestClanPosition[clan];
-      }
     }
   }
 }
@@ -315,18 +333,16 @@ void ClanParticleSwarm::leadersConference(){
 }
 
 void ClanParticleSwarm::updateBest(int pos){
-  for(int i=0; i<numClans; i++){
-    if(problem->fitnesIsBetter(swarm->getIndividual(leaders[i])->getFitness(), this->bestFitness)){
-      this->bestFitness = swarm->getIndividual(leaders[i])->getFitness();
-      this->bestPosition = swarm->getIndividual(leaders[i])->getCurrentPosition();
+  Individual *tmpInd;
+  for(int i=0; i<tamPopulation; i++){
+    tmpInd = swarm->getIndividual(i);
+    if(problem->fitnesIsBetter(tmpInd->getBestFitness(), this->bestFitness)){
+      this->bestFitness = tmpInd->getBestFitness();
+      this->bestPosition = tmpInd->getFullBestPosition();
     }
   }
-  // cout << "best: ";
-  // for(int i=0; i < problem->getDimension(); i++) {
-  //   cout << "* " << this->bestPosition[i];
-  // }
-  // cout << " - fitness : " << this->bestFitness << endl;
   bestIndividualFitness[pos] += this->bestFitness;
+  offlineError[pos] += problem->getFitnessObjetive() - this->bestFitness;
 }
 
 void ClanParticleSwarm::updatePlot(int pos){

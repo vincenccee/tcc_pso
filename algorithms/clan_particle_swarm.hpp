@@ -23,6 +23,7 @@ class ClanParticleSwarm {
   private:
     Problem *problem;
     Population *swarm;
+    Individual *testParticle;
     Util *util;
     std::vector<std::vector<double>> bestClanPosition;
     std::vector<double> bestClanFitness;
@@ -31,6 +32,7 @@ class ClanParticleSwarm {
     std::vector<double> bestIndividualFitness;
     std::vector<double> populationDiversity;
     std::vector<double> finalFitness;
+    std::vector<double> offlineError;
     std::vector<int> leaders;
 
     double bestFitness;
@@ -49,6 +51,8 @@ class ClanParticleSwarm {
 
     void showPopulation();
     void evolutionaryCicle(int iterations, int runs);
+    void initializeVariables();
+    void initializeTestParticle();
     void evaluatePopulationFitnessFirst();
     void evaluatePopulationFitness(int clan);
     void updateParticleVelocity(int clan);
@@ -56,6 +60,7 @@ class ClanParticleSwarm {
     void updateClanLeaders(int clan);
     void leadersConference();
     void detectChange(int it);
+    void reevaluteBestFitness();
     double validateVelocity(double velocity);
     std::vector<double> validatePosition(std::vector<double> position);
     void initializeBest();

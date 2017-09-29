@@ -3,12 +3,12 @@
 #include <vector>
 #include <algorithm>
 
-#define TAM_POP 100
-#define DIMENSION 10
-#define SCENARIO 2
+#define TAM_POP 10
+#define DIMENSION 2
+#define SCENARIO 1
 #define ITERATIONS 2000
 #define RUNS 1
-#define NUM_CLANS 2
+#define NUM_CLANS 5
 
 #include <string>
 #include <cmath>
