@@ -15,6 +15,10 @@ double Rosembrock::getLowerBound(int pos){
   return -30.0;
 }
 
+double Rosembrock::getFitnessObjetive(){
+  return 1.0;
+}
+
 double Rosembrock::evaluateFitness(std::vector<double> solution){
   double auxSum = 0;
   double aux = 0;
@@ -37,6 +41,10 @@ bool Rosembrock::fitnesIsBetter(double newFit, double oldFit){
 
 bool Rosembrock::isMinimization(){
   return true;
+}
+
+bool Rosembrock::isDynamic(){
+  return false;
 }
 
 void Rosembrock::resetProblem() {}

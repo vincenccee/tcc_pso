@@ -2,12 +2,11 @@
 
 using namespace std;
 
-Individual::Individual(std::vector<double> position, int dimension){
+Individual::Individual(std::vector<double> position, std::vector<double> velocity, int dimension){
   this->currentPosition = position;
   this->bestPosition = position;
-  for(unsigned int i=0; i<dimension; i++){
-    this->velocity.push_back(0.0);
-  }
+  this->velocity = velocity;
+  this->fitness = 0.0;
 }
 
 Individual::~Individual(){}
@@ -18,6 +17,10 @@ std::vector<double> Individual::getCurrentPosition(){
 
 std::vector<double> Individual::getVelocityVector(){
   return this->velocity;
+}
+
+std::vector<double> Individual::getFullBestPosition(){
+  return this->bestPosition;
 }
 
 double Individual::getBestPosition(int pos){
@@ -56,6 +59,6 @@ void Individual::setFitness(double fitness){
   this->fitness = fitness;
 }
 
-void Individual::setBestFitness(double fitness){
-  this->bestFitness = fitness;
+void Individual::setBestFitness(double bestFitness){
+  this->bestFitness = bestFitness;
 }

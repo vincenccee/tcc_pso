@@ -14,10 +14,11 @@ class Individual {
     double bestFitness;
 
   public:
-    Individual(std::vector<double> position, int dimension);
+    Individual(std::vector<double> position, std::vector<double> velocity, int dimension);
     ~Individual();
 
     std::vector<double> getCurrentPosition();
+    std::vector<double> getFullBestPosition();
     std::vector<double> getVelocityVector();
     double getBestPosition(int pos);
     double getVelocity(int pos);
@@ -29,7 +30,7 @@ class Individual {
     void setBestPosition(std::vector<double> bestPosition);
     void setVelocity(std::vector<double> velocity);
     void setFitness(double fitness);
-    void setBestFitness(double fitness);
+    void setBestFitness(double bestFitness);
 };
 
 #endif

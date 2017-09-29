@@ -4,6 +4,7 @@
 #include <vector>
 #include <cmath>
 #include <string>
+#include <random>
 
 // Source: https://github.com/DEAP/deap/blob/master/deap/benchmarks/movingpeaks.py
 #include "../problem.hpp"
@@ -19,10 +20,12 @@ class MovingPeaks: public Problem {
 
     double getUpperBound(int pos);
     double getLowerBound(int pos);
+    double getFitnessObjetive();
     double evaluateFitness(std::vector<double> solution);
     std::string getName();
     bool fitnesIsBetter(double newFit, double oldFit);
     bool isMinimization();
+    bool isDynamic();
     void resetProblem();
 
   private:
@@ -39,6 +42,7 @@ class MovingPeaks: public Problem {
 
     int count;
     Scenario * scen;
+    std::random_device rd;     // only used once to initialise (seed) engine
     std::vector<double> peaks_height;
     std::vector<double> peaks_width;
     std::vector<std::vector<double>> last_change_vector;

@@ -15,6 +15,10 @@ double Schwefel::getLowerBound(int pos){
   return -100.0;
 }
 
+double Schwefel::getFitnessObjetive(){
+  return 0.0;
+}
+
 double Schwefel::evaluateFitness(std::vector<double> solution){
   double fitness = 0;
   double auxFit = 0;
@@ -39,6 +43,10 @@ bool Schwefel::fitnesIsBetter(double newFit, double oldFit){
 
 bool Schwefel::isMinimization(){
   return true;
+}
+
+bool Schwefel::isDynamic(){
+  return false;
 }
 
 void Schwefel::resetProblem() {}

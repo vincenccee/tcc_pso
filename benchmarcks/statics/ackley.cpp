@@ -15,6 +15,10 @@ double Ackley::getLowerBound(int pos){
   return -32.0;
 }
 
+double Ackley::getFitnessObjetive(){
+  return 0.0;
+}
+
 double Ackley::evaluateFitness(std::vector<double> solution){
   double aux = 0;
   double aux1 = 0;
@@ -39,6 +43,10 @@ bool Ackley::fitnesIsBetter(double newFit, double oldFit){
 
 bool Ackley::isMinimization(){
   return true;
+}
+
+bool Ackley::isDynamic(){
+  return false;
 }
 
 void Ackley::resetProblem() {}

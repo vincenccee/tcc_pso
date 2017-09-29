@@ -8,17 +8,18 @@ MovingPeaks::MovingPeaks(int dimension, int scenario){
 
 void MovingPeaks::initializePeaks(){
   this->count = 0;
-  
+
   // set initial height for all peaks
   if(scen->start_height != 0){
     for(int i=0; i<scen->npeaks; i++)
       peaks_height.push_back(scen->start_height);
   }else{
-    for(int i=0; i<scen->npeaks; i++)
+    for(int i=0; i<scen->npeaks; i++){
       peaks_height.push_back(fRand(scen->min_height, scen->max_height));
+    }
   }
 
-  // set initial width for all peaks 
+  // set initial width for all peaks
   if(scen->start_width != 0){
     for(int i=0; i<scen->npeaks; i++)
       peaks_width.push_back(scen->start_width);
@@ -68,6 +69,15 @@ double MovingPeaks::getLowerBound(int pos){
 	return scen->min_coord;
 }
 
+double MovingPeaks::getFitnessObjetive(){
+  double max_peak_height = 0;
+  for(int i=0; i<peaks_height.size(); i++){
+    if(peaks_height[i] > max_peak_height)
+      max_peak_height = peaks_height[i];
+  }
+  return max_peak_height;
+}
+
 double MovingPeaks::evaluateFitness(std::vector<double> solution){
   std::vector<double> possible_values;
   this->count++;
@@ -77,6 +87,7 @@ double MovingPeaks::evaluateFitness(std::vector<double> solution){
   if(this->count % scen->period == 0){
     cout << "evaluations: " << this->count << endl;
     changePeaks();
+    showPeakes();
   }
 
   return maxValue(possible_values);
@@ -92,6 +103,10 @@ bool MovingPeaks::fitnesIsBetter(double newFit, double oldFit){
 
 bool MovingPeaks::isMinimization(){
 	return false;
+}
+
+bool MovingPeaks::isDynamic(){
+	return true;
 }
 
 double MovingPeaks::cone(std::vector<double> individual, std::vector<double> position, double height, double width){
@@ -214,12 +229,13 @@ double MovingPeaks::maxValue(std::vector<double> values){
 }
 
 double MovingPeaks::fRand(double fMin, double fMax){
-  double f = (double)rand() / RAND_MAX;
-  return fMin + f * (fMax - fMin);
+  std::mt19937 rng(rd()); // random-number engine used (Mersenne-Twister in this case)
+  std::uniform_real_distribution<double> uni(fMin,fMax); // guaranteed unbiased
+  double number = uni(rng);
+  return number;
 }
 
 void MovingPeaks::resetProblem() {
-  // showPeakes();
   peaks_height.clear();
   peaks_width.clear();
   peaks_position.clear();

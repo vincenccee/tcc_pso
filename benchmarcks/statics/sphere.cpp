@@ -15,6 +15,10 @@ double Sphere::getLowerBound(int pos){
   return -100.0;
 }
 
+double Sphere::getFitnessObjetive(){
+  return 0.0;
+}
+
 double Sphere::evaluateFitness(std::vector<double> solution){
 
   double top = 0;
@@ -36,6 +40,10 @@ bool Sphere::fitnesIsBetter(double newFit, double oldFit){
 
 bool Sphere::isMinimization(){
   return true;
+}
+
+bool Sphere::isDynamic(){
+  return false;
 }
 
 void Sphere::resetProblem() {}
