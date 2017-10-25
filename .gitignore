@@ -46,3 +46,5 @@ app
 *.eps
 *.output
 *.dSYM
+*.png
+*.csv
