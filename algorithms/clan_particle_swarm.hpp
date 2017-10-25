@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <random>
+#include <sstream>
 #include "../population.hpp"
 #include "../individual.hpp"
 #include "../util.hpp"
@@ -18,6 +19,8 @@
 #define INERTIA 0.729
 #define VMAX 0.1
 #define VTYPE 1
+
+#define RATE 200
 
 class ClanParticleSwarm {
   private:
@@ -50,6 +53,7 @@ class ClanParticleSwarm {
     ~ClanParticleSwarm();
 
     void showPopulation();
+    void contourMapData(int change);
     void evolutionaryCicle(int iterations, int runs);
     void initializeVariables();
     void initializeTestParticle();
