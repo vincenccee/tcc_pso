@@ -25,12 +25,33 @@ void ClanParticleSwarm::showPopulation(){
     }
     cout << " - fitness: " << swarm->getIndividual(i)->getFitness() << " - bestF: " << swarm->getIndividual(i)->getBestFitness() << endl;
     /* show population velocity */
-    cout << "velo: " << "\t";
-    for(unsigned int j=0; j<position.size() ; j++){
-      cout << " * " << swarm->getIndividual(i)->getVelocity(j);
-    }
-    cout << endl;
+    // cout << "velo: " << "\t";
+    // for(unsigned int j=0; j<position.size() ; j++){
+    //   cout << " * " << swarm->getIndividual(i)->getVelocity(j);
+    // }
+    // cout << endl;
   }
+}
+
+void ClanParticleSwarm::contourMapData(int change){
+  ofstream myfile;
+  std::ostringstream oss;
+  oss << "contour_data_" << change << ".csv";
+  myfile.open(oss.str());
+  std::vector<double> position;
+  double lb = problem->getLowerBound(0);
+  double up = problem->getUpperBound(0);
+  double jump = (up - lb)/RATE;
+  for(int i=0; i<RATE; i++){
+    for(int j=0; j<RATE; j++){
+      position = { i*jump, j*jump };
+      myfile << problem->evaluateFit(position);
+      if(j != RATE-1)
+        myfile << ",";
+    }
+    myfile << endl;
+  }
+  myfile.close();
 }
 
 void ClanParticleSwarm::evolutionaryCicle(int iterations, int runs){
@@ -43,10 +64,15 @@ void ClanParticleSwarm::evolutionaryCicle(int iterations, int runs){
     swarm->initializePopulation();
     this->m_nmdf = 0;
     evaluatePopulationFitnessFirst();
-    initializeTestParticle();
     initializeBest();
+    contourMapData(0);
     cout << "************** inicio ****************" << endl;
     for(int i=0; i<this->iterations; i++){
+      initializeTestParticle();
+      // if(i%50 == 0){
+      //   cout << "************ " << i << " ************" << endl;
+      //   showPopulation();
+      // }
       for(int clan=0; clan<this->numClans; clan++){
         updateParticleVelocity(clan);
         updateParticlePosition(clan);
@@ -79,7 +105,7 @@ void ClanParticleSwarm::evolutionaryCicle(int iterations, int runs){
 
   this->util->gnu_plot_convergence_best_mean(bestIndividualFitness, bestPopulationFitness, iterations, "MelhoraFitness", "melhora_fit");
   this->util->gnu_plot_convergence(populationDiversity, iterations, "pop_diversity", "fitnessdaPopulacao", "Divesidade Genotipica", 1);
-  this->util->gnu_plot_convergence(offlineError, iterations, "offline_error", "MedidaDePerformance", "Offline Error", 10);
+  this->util->gnu_plot_convergence(offlineError, iterations, "offline_error", "MedidaDePerformance", "Offline Error", 2.0);
   this->util->closeData();
 }
 
@@ -265,9 +291,10 @@ void ClanParticleSwarm::evaluatePopulationFitness(int clan){
 
 void ClanParticleSwarm::detectChange(int it){
   double newFit = problem->evaluateFitness(this->testParticle->getCurrentPosition());
+  // cout << "teste particle: " << testParticle->getFitness() << endl;
   if(testParticle->getFitness() != newFit){
     cout << "detect change!! - " << it << endl;
-    showPopulation();
+    // showPopulation();
     testParticle->setFitness(newFit);
     for(int i=0; i<numClans; i++){
       reevaluteBestFitness();
