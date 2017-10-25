@@ -11,6 +11,7 @@ class Problem {
     virtual double getLowerBound(int pos) = 0;
     virtual double getFitnessObjetive() = 0;
     virtual double evaluateFitness(std::vector<double> solution) = 0;
+    virtual double evaluateFit(std::vector<double> solution) = 0;
     virtual std::string getName() = 0;
     virtual bool fitnesIsBetter(double newFit, double oldFit) = 0;
     virtual bool isMinimization() = 0;

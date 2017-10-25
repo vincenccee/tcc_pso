@@ -33,6 +33,20 @@ double Schwefel::evaluateFitness(std::vector<double> solution){
   return fitness;
 }
 
+double Schwefel::evaluateFit(std::vector<double> solution){
+  double fitness = 0;
+  double auxFit = 0;
+
+  for (int i = 0; i < this->dimension; i++) {
+    for (int j = 0; j <= i; j++) {
+      auxFit += solution[j];
+    }
+    fitness += (auxFit * auxFit);
+    auxFit = 0;
+  }
+  return fitness;
+}
+
 std::string Schwefel::getName(){
   return "Schwefel";
 }

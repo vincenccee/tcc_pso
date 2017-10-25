@@ -20,7 +20,16 @@ double Sphere::getFitnessObjetive(){
 }
 
 double Sphere::evaluateFitness(std::vector<double> solution){
+  double top = 0;
+  unsigned short int i;
+  for (i = 0; i < this->dimension; i++)
+  {
+    top=top+solution[i]*solution[i];
+  }
+  return top;
+}
 
+double Sphere::evaluateFit(std::vector<double> solution){
   double top = 0;
   unsigned short int i;
   for (i = 0; i < this->dimension; i++)

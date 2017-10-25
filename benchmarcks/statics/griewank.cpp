@@ -31,6 +31,18 @@ double Griewank::evaluateFitness(std::vector<double> solution){
   return fitness;
 }
 
+double Griewank::evaluateFit(std::vector<double> solution){
+  double fitness = 0;
+  double auxSum = 0;
+  double auxMul = 1;
+  for(int i = 0 ; i < this->dimension; i++) {
+    auxSum += (pow(solution[i], 2) / 4000);
+    auxMul *= cos(solution[i] / sqrt(i + 1));
+  }
+  fitness = 1 + auxSum - auxMul;
+  return fitness;
+}
+
 std::string Griewank::getName(){
   return "Griewank";
 }

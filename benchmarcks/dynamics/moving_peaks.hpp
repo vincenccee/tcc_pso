@@ -22,6 +22,7 @@ class MovingPeaks: public Problem {
     double getLowerBound(int pos);
     double getFitnessObjetive();
     double evaluateFitness(std::vector<double> solution);
+    double evaluateFit(std::vector<double> solution); // don't count
     std::string getName();
     bool fitnesIsBetter(double newFit, double oldFit);
     bool isMinimization();
