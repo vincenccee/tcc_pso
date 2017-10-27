@@ -46,6 +46,7 @@ class ClanParticleSwarm {
     int runs;
     int iterations;
     int tamPopulation;
+    int change;
 
   public:
     ClanParticleSwarm(Problem *problem, int tamPopulation, int numClans);
@@ -54,6 +55,7 @@ class ClanParticleSwarm {
 
     void showPopulation();
     void contourMapData(int change);
+    void populationData(int change);
     void evolutionaryCicle(int iterations, int runs);
     void initializeVariables();
     void initializeTestParticle();

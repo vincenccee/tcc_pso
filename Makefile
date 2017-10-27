@@ -52,7 +52,7 @@ scenario.o: benchmarcks/scenario.cpp
 	g++ $(PARAMS) benchmarcks/scenario.cpp
 
 clean:
-	rm *~ *.o *.eps *.dataset *.output app; clear;
+	rm *~ *.o *.eps *.dataset *.output *.csv *.png app; clear;
 
 god:
 	make clean; make; ./app
