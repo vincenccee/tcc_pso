@@ -23,6 +23,7 @@ class Population {
     std::vector<double> randonPosition();
     std::vector<Individual> getPopulation();
     Individual * getIndividual(int pos);
+    void resetIndividual(int ind);
     void updateIndividual(Individual individual, int pos);
 
     int getTamPopulation();

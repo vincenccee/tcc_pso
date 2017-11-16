@@ -39,6 +39,17 @@ Individual * Population::getIndividual(int pos){
   return &population[pos];
 }
 
+void Population::resetIndividual(int ind){
+  std::vector<double> position;
+  std::vector<double> velocity;
+  for(int j=0; j<dimension; j++){
+    position.push_back(fRand(lowerBound, upperBound));
+    velocity.push_back((upperBound - lowerBound) * fRand(0,1) + lowerBound);
+  }
+  Individual *tmpInd = new Individual(position, velocity, this->dimension);
+  this->population[ind] = *tmpInd;
+}
+
 void Population::updateIndividual(Individual individual, int pos){
   this->population[pos] = individual;
 }

@@ -36,6 +36,7 @@ class ClanParticleSwarm {
     std::vector<double> populationDiversity;
     std::vector<double> finalFitness;
     std::vector<double> offlineError;
+    std::vector<double> finalOfflineError;
     std::vector<int> leaders;
 
     double bestFitness;
@@ -43,6 +44,7 @@ class ClanParticleSwarm {
     double m_nmdf;
     int numClans;
     int clanSize;
+    int bestClan;
     int runs;
     int iterations;
     int tamPopulation;
@@ -66,6 +68,7 @@ class ClanParticleSwarm {
     void updateClanLeaders(int clan);
     void leadersConference();
     void detectChange(int it);
+    void explosion();
     void reevaluteBestFitness();
     double validateVelocity(double velocity);
     std::vector<double> validatePosition(std::vector<double> position);
