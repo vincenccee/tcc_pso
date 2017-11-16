@@ -108,6 +108,7 @@ void ClanParticleSwarm::evolutionaryCicle(int iterations, int runs){
       }
       updateBest(i);
       updatePlot(i);
+      leaderSharing();
     }
     this->change++;
     populationData(this->change);
@@ -408,6 +409,44 @@ void ClanParticleSwarm::leadersConference(){
   updateParticleVelocity(clan);
   updateParticlePosition(clan);
   evaluatePopulationFitness(clan);
+}
+
+void ClanParticleSwarm::leaderSharing(){
+  Individual *tmpInd;
+  vector<vector<double>> legaleaderDistances;
+  vector<double> rowDistance;
+  double sigma = 1.5;
+  double sum, dist, newFit;
+  for(int i=0; i<numClans; i++) {
+    rowDistance.clear();
+    sum = 0.0;
+    for(int j=0; j<numClans; j++) {
+      if(i == j) {
+        rowDistance.push_back(0.0);
+      } else {
+        dist = this->util->euclideanDistance(
+          swarm->getIndividual(leaders[i])->getCurrentPosition(),
+          swarm->getIndividual(leaders[j])->getCurrentPosition()
+        );
+        rowDistance.push_back(dist);
+      }
+    }
+    legaleaderDistances.push_back(rowDistance);
+    for(int j=0; j<numClans; j++) {
+      if(i != j || rowDistance[j] < sigma) {
+        sum += (1.0 - pow(rowDistance[j]/sigma,2));
+      }
+    }
+    if(sum > 1){
+      // cout << "leader: " << i << " - soma: " << sum << endl;
+      tmpInd = swarm->getIndividual(leaders[i]);
+      newFit = tmpInd->getBestFitness()/sum;
+      // cout << "leader: " << i << " - fit: " << tmpInd->getFitness() << " - newfit: " << newFit << endl;
+
+      tmpInd->setBestFitness(newFit);
+      swarm->updateIndividual(*tmpInd, leaders[i]);
+    }
+  }
 }
 
 void ClanParticleSwarm::updateBest(int pos){

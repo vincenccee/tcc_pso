@@ -31,6 +31,7 @@ class Util {
     string space2underscore(string text);
     double standardDeviation(vector<double> data);
     double arithmeticAverage(vector<double> data);
+    double euclideanDistance(vector<double> data1, vector<double> data2);
 };
 
 #endif

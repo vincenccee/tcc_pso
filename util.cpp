@@ -135,3 +135,11 @@ double Util::arithmeticAverage(std::vector<double> data){
   }
   return (sum / data.size());
 }
+
+double Util::euclideanDistance(vector<double> data1, vector<double> data2){
+  double sum = 0;
+  for (unsigned int i=0; i<data1.size(); i++) {
+    sum += pow((data1[i] - data2[i]), 2);
+  }
+  return sqrt(sum);
+}

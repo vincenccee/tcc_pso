@@ -67,6 +67,7 @@ class ClanParticleSwarm {
     void updateParticlePosition(int clan);
     void updateClanLeaders(int clan);
     void leadersConference();
+    void leaderSharing();
     void detectChange(int it);
     void explosion();
     void reevaluteBestFitness();
